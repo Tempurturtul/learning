@@ -62,10 +62,10 @@ c2 = 'Ø'
 c3 = 'ダ'
 
 -- Strings. (Lists of characters with special syntax.)
+s :: String
 s = "Hello, Haskell!"
 
 
-s :: String
 
 {----------------------------------------------------------
   Arithmetic
@@ -230,7 +230,11 @@ lyahNouns = ["hobo","frog","pope"]
 lyahAdjectives = ["lazy","grouchy","scheming"]
 lyahEx5 = [adjective ++ " " ++ noun | adjective <- lyahAdjectives, noun <- lyahNouns]
 
--- Constructing Lists
+
+
+{----------------------------------------------------------
+  Constructing Lists
+----------------------------------------------------------}
 
 emptyList = []
 
@@ -242,8 +246,47 @@ ex21 = [2,3,4] == 2 : 3 : 4 : []
 -- Note that [2,3,4] is just convenient shorthand.
 -- Also note that these are NOT arrays.
 
-{- Generate the sequence of hailstone iterations from a staring
+{- Generate the sequence of hailstone iterations from a starting
    number. -}
 hailstoneSeq :: Integer -> [Integer]
 hailstoneSeq 1 = [1]
 hailstoneSeq n = n : hailstoneSeq (hailstone n)
+
+
+
+{----------------------------------------------------------
+  Functions on Lists
+----------------------------------------------------------}
+
+-- Using pattern matching:
+-- Compute the length of a list of Integers.
+intListLength :: [Integer] -> Integer
+intListLength []     = 0
+intListLength (_:xs) = 1 + intListLength xs
+{- above: if the input list looks like an element we don't care about
+   consed onto some other elements... -}
+
+-- Using nested patterns:
+sumEveryTwo :: [Integer] -> [Integer]
+sumEveryTwo []         = []
+sumEveryTwo (x:[])     = [x]
+sumEveryTwo (x:y:zs) = (x + y) : sumEveryTwo zs
+-- Equivalent to above but more verbose: sumEveryTwo (x:(y:zs)) = ...
+
+
+
+{----------------------------------------------------------
+  Combining Functions
+----------------------------------------------------------}
+
+{- "It's good Haskell style to build up more complex functions by
+   combining simple ones." -}
+
+{- The number of hailstone steps needed to reach 1 from a starting
+   number. -}
+hailstoneLen :: Integer -> Integer
+hailstoneLen n = intListLength (hailstoneSeq n) - 1
+
+{- Note: The above may seem inefficient, but due to lazy evaluation
+   each element of the sequence is only generated as needed. This is
+   the correct way to write idiomatic and efficient Haskell. -}
