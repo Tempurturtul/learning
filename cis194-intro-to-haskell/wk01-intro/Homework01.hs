@@ -132,7 +132,11 @@ hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
 hanoi 0 _ _ _ = []
 hanoi 1 a b _ = (a,b) : []
 hanoi 2 a b c = (a,c) : (a,b) : hanoi 1 c b a
-hanoi n a b c = concatTwoLists (concatTwoLists (hanoi (n - 1) a c b) (hanoi 1 a b c)) (hanoi (n - 1) c b a)
+hanoi n a b c = (hanoi (n - 1) a c b) `concatTwoLists` (hanoi 1 a b c) `concatTwoLists` (hanoi (n - 1) c b a)
+
+{- Note on the above: I stumbled upon this answer while going through
+   successive cases looking for a pattern. I didn't expect it to
+   work to be honest. Playing with stackable measuring cups helped. -}
 
 
 
@@ -146,97 +150,126 @@ hanoi n a b c = concatTwoLists (concatTwoLists (hanoi (n - 1) a c b) (hanoi 1 a 
 
 
 
-{- The below is dedicated to checking the validity of the hanoi
-   result. -}
-
-
+{----------------------------------------------------------
+  The below is dedicated to checking the validity of the
+  hanoi results.
+----------------------------------------------------------}
 
 -- Disc represented by weight.
 type Disc = Integer
+type Tower = (Peg, [Disc])
+type Board = [Tower]
 
--- Whether or not a peg is present in a list of (Peg, [Disc]) pairs.
-pegPresent :: Peg -> [(Peg, [Disc])] -> Bool
-pegPresent _ [] = False
-pegPresent a ((p,_):xs)
-  | a == p    = True
-  | otherwise = pegPresent a xs
+-- pegsExist
+-- discOnPeg
+-- topDisc
+-- addDisc
+-- removeDisc
 
-{- Whether or not a list of pegs is present in a list of
-   (Peg, [Disc]) pairs. -}
-pegsPresent :: [Peg] -> [(Peg, [Disc])] -> Bool
-pegsPresent [] _      = error "Must check presence of at least one peg."
-pegsPresent xs []     = False
-pegsPresent (x:[]) ys = pegPresent x ys
-pegsPresent (x:xs) ys
-  | pegPresent x ys = pegsPresent xs ys
-  | otherwise       = False
+-- Checks the legality of a move.
+legalMove :: Move -> Board -> Bool
+legalMove (x,y) b
+  | not (pegsExist [x,y] b) = False
+  | not (discOnPeg x b)     = False
+  | otherwise               = (topDisc x b) < (topDisc y b)
 
-{- Whether or not at least one disc is present on a given peg in a
-   list of (Peg, [Disc]) pairs. -}
-discPresent :: Peg -> [(Peg, [Disc])] -> Bool
-discPresent _ [] = False
-discPresent a ((p,[]):xs)
-  | a == p    = False
-  | otherwise = discPresent a xs
-discPresent a ((p,_):xs)
-  | a == p    = True
-  | otherwise = discPresent a xs
+-- Makes a move.
+makeMove :: Move -> Board -> Board
+makeMove (x,y) b
+  | legalMove (x,y) b = addDisc (topDisc x b) y (removeDisc x b)
+  | otherwise         = error "Illegal move."
 
--- Gets the top disc from a (Peg, [Disc]) pair.
-getDiscFromPeg :: (Peg, [Disc]) -> Disc
-getDiscFromPeg (p, [])   = error "No discs."
-getDiscFromPeg (p, d:ds) = d
+-- Makes moves.
+makeMoves :: [Move] -> Board -> Board
+makeMoves [] b     = b
+makeMoves (m:ms) b = makeMoves ms (makeMove m b)
 
--- Gets the top disc from a list of (Peg, [Disc]) pairs.
-getDiscFromPegs :: Peg -> [(Peg, [Disc])] -> Disc
-getDiscFromPegs a ((p,ds):xs)
-  | not (pegPresent a ((p,ds):xs)) = error "Peg must be present."
-  | p == a                         = getDiscFromPeg (p,ds)
-  | otherwise                      = getDiscFromPegs a xs
+-- Draws a tower.
+-- Draws a board.
 
--- Removes a disc from a (Peg, [Disc]) pair and yields the updated pair.
-removeDiscFromPeg :: (Peg, [Disc]) -> (Peg, [Disc])
-removeDiscFromPeg (p, [])   = error "No discs on the peg."
-removeDiscFromPeg (p, d:ds) = (p, ds)
-
--- Removes a disc from a (Peg, [Disc]) pair and yields the updated pairs.
-removeDiscFromPegs :: Peg -> [(Peg, [Disc])] -> [(Peg, [Disc])]
-removeDiscFromPegs a ((p,ds):xs)
-  | not (pegPresent a ((p,ds):xs)) = error "Peg must be present."
-  | p == a                         = (removeDiscFromPeg (p,ds)) : xs
-  | otherwise                      = (p,ds) : removeDiscFromPegs a xs
-
--- Adds a disc to a (Peg, [Disc]) pair and yields the updated pair.
-addDiscToPeg :: Disc -> (Peg, [Disc]) -> (Peg, [Disc])
-addDiscToPeg d (p, ds) = (p, (d:ds))
-
-{- Adds a disc to a list of (Peg, [Disc]) pairs and yeilds the
-   updated list of pairs. -}
-addDiscByPeg :: Disc -> Peg -> [(Peg, [Disc])] -> [(Peg, [Disc])]
-addDiscByPeg d a ((p,ds):xs)
-  | not (pegPresent a ((p,ds):xs)) = error "Peg must be present."
-  | p == a                         = addDiscToPeg d (p,ds) : xs
-  | otherwise                      = (p,ds) : addDiscByPeg d a xs
-
--- Checks the legality of a hanoi move.
-legalMove :: Move -> [(Peg, [Disc])] -> Bool
-legalMove (a,b) []     = False
-legalMove (a,b) (x:[]) = False
-legalMove (a,b) xs
-  | pegPresent a xs && pegPresent b xs = not (discPresent b xs) || (getDiscFromPegs a xs) < (getDiscFromPegs b xs)
-  | otherwise                          = False
-
--- Makes a hanoi move and yields updated list of (Peg, [Disc]) pairs.
-makeMove :: Move -> [(Peg, [Disc])] -> [(Peg, [Disc])]
-makeMove (a,b) ps
-  | legalMove (a,b) ps = addDiscByPeg (getDiscFromPegs a ps) b (removeDiscFromPegs a ps)
-  | otherwise          = error "Cannot make an illegal move."
-
-{- Make a list of hanoi moves and yields updated list of
-   (Peg, [Disc]) pairs. -}
-makeMoves :: [Move] -> [(Peg, [Disc])] -> [(Peg, [Disc])]
-makeMoves [] xs = xs
-makeMoves (m:ms) xs = makeMoves ms (makeMove m xs)
+-- -- Whether or not a peg is present in a list of (Peg, [Disc]) pairs.
+-- pegPresent :: Peg -> [(Peg, [Disc])] -> Bool
+-- pegPresent _ [] = False
+-- pegPresent a ((p,_):xs)
+--   | a == p    = True
+--   | otherwise = pegPresent a xs
+--
+-- {- Whether or not a list of pegs is present in a list of
+--    (Peg, [Disc]) pairs. -}
+-- pegsPresent :: [Peg] -> [(Peg, [Disc])] -> Bool
+-- pegsPresent [] _      = error "Must check presence of at least one peg."
+-- pegsPresent xs []     = False
+-- pegsPresent (x:[]) ys = pegPresent x ys
+-- pegsPresent (x:xs) ys
+--   | pegPresent x ys = pegsPresent xs ys
+--   | otherwise       = False
+--
+-- {- Whether or not at least one disc is present on a given peg in a
+--    list of (Peg, [Disc]) pairs. -}
+-- discPresent :: Peg -> [(Peg, [Disc])] -> Bool
+-- discPresent _ [] = False
+-- discPresent a ((p,[]):xs)
+--   | a == p    = False
+--   | otherwise = discPresent a xs
+-- discPresent a ((p,_):xs)
+--   | a == p    = True
+--   | otherwise = discPresent a xs
+--
+-- -- Gets the top disc from a (Peg, [Disc]) pair.
+-- getDiscFromPeg :: (Peg, [Disc]) -> Disc
+-- getDiscFromPeg (p, [])   = error "No discs."
+-- getDiscFromPeg (p, d:ds) = d
+--
+-- -- Gets the top disc from a list of (Peg, [Disc]) pairs.
+-- getDiscFromPegs :: Peg -> [(Peg, [Disc])] -> Disc
+-- getDiscFromPegs a ((p,ds):xs)
+--   | not (pegPresent a ((p,ds):xs)) = error "Peg must be present."
+--   | p == a                         = getDiscFromPeg (p,ds)
+--   | otherwise                      = getDiscFromPegs a xs
+--
+-- -- Removes a disc from a (Peg, [Disc]) pair and yields the updated pair.
+-- removeDiscFromPeg :: (Peg, [Disc]) -> (Peg, [Disc])
+-- removeDiscFromPeg (p, [])   = error "No discs on the peg."
+-- removeDiscFromPeg (p, d:ds) = (p, ds)
+--
+-- -- Removes a disc from a (Peg, [Disc]) pair and yields the updated pairs.
+-- removeDiscFromPegs :: Peg -> [(Peg, [Disc])] -> [(Peg, [Disc])]
+-- removeDiscFromPegs a ((p,ds):xs)
+--   | not (pegPresent a ((p,ds):xs)) = error "Peg must be present."
+--   | p == a                         = (removeDiscFromPeg (p,ds)) : xs
+--   | otherwise                      = (p,ds) : removeDiscFromPegs a xs
+--
+-- -- Adds a disc to a (Peg, [Disc]) pair and yields the updated pair.
+-- addDiscToPeg :: Disc -> (Peg, [Disc]) -> (Peg, [Disc])
+-- addDiscToPeg d (p, ds) = (p, (d:ds))
+--
+-- {- Adds a disc to a list of (Peg, [Disc]) pairs and yeilds the
+--    updated list of pairs. -}
+-- addDiscByPeg :: Disc -> Peg -> [(Peg, [Disc])] -> [(Peg, [Disc])]
+-- addDiscByPeg d a ((p,ds):xs)
+--   | not (pegPresent a ((p,ds):xs)) = error "Peg must be present."
+--   | p == a                         = addDiscToPeg d (p,ds) : xs
+--   | otherwise                      = (p,ds) : addDiscByPeg d a xs
+--
+-- -- Checks the legality of a hanoi move.
+-- legalMove :: Move -> [(Peg, [Disc])] -> Bool
+-- legalMove (a,b) []     = False
+-- legalMove (a,b) (x:[]) = False
+-- legalMove (a,b) xs
+--   | pegPresent a xs && pegPresent b xs = not (discPresent b xs) || (getDiscFromPegs a xs) < (getDiscFromPegs b xs)
+--   | otherwise                          = False
+--
+-- -- Makes a hanoi move and yields updated list of (Peg, [Disc]) pairs.
+-- makeMove :: Move -> [(Peg, [Disc])] -> [(Peg, [Disc])]
+-- makeMove (a,b) ps
+--   | legalMove (a,b) ps = addDiscByPeg (getDiscFromPegs a ps) b (removeDiscFromPegs a ps)
+--   | otherwise          = error "Cannot make an illegal move."
+--
+-- {- Make a list of hanoi moves and yields updated list of
+--    (Peg, [Disc]) pairs. -}
+-- makeMoves :: [Move] -> [(Peg, [Disc])] -> [(Peg, [Disc])]
+-- makeMoves [] xs = xs
+-- makeMoves (m:ms) xs = makeMoves ms (makeMove m xs)
 
 {-
 
