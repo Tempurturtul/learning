@@ -234,8 +234,32 @@ assembleBoard n (p:ps)
   | n > 0     = (p,[1..n]) : assembleBoard 0 ps
   | otherwise = (p,[]) : assembleBoard 0 ps
 
--- Draws a board.
+-- Gets the biggest number of discs on a peg.
+mostDiscs :: Board -> Int
+mostDiscs [] = 0
+mostDiscs ((_,ds):xs)
+  | length ds > mostDiscs xs = length ds
+  | otherwise                = mostDiscs xs
 
+{- Removes the top-most disc (or discs if there are more than one at
+   the same height) from a board. -}
+-- removeTop :: Board -> Board
+
+-- Draws discs at given height (0 is base). No disc is "|".
+-- drawDiscsAtHeight :: Int -> Board -> String
+-- drawDiscsAtHeight _ []          = "\n"
+-- drawDiscsAtHeight n _
+--   | n < 0                       = error "Disc height cannot be negative."
+-- drawDiscsAtHeight n ((_,[]):xs) = "|" ++ drawDiscsAtHeight n xs
+-- drawDiscsAtHeight n ((p,d:ds):xs)
+--   | length (d:ds) - 1 < n  = "|" ++ drawDiscsAtHeight n xs
+--   | length (d:ds) - 1 == n = show d ++ drawDiscsAtHeight n xs
+--   | otherwise              = drawDiscsAtHeight n ((p,ds):xs)
+
+-- Draws a board.
+-- drawBoard :: Board -> String
+-- drawBoard [] = "\n"
+-- drawBoard b  = drawDiscsAtHeight (mostDiscs b) b ++ drawBoard (removeTop b)
 
 {-
 
