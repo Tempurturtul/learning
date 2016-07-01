@@ -154,7 +154,9 @@ hanoi n a b c = (hanoi (n - 1) a c b) `concatTwoLists` (hanoi 1 a b c) `concatTw
 {----------------------------------------------------------
   The below is dedicated to checking the validity of the
   hanoi results.
-  (Usage: makeMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
+
+  Usage:
+    putStr (visualizeMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
 ----------------------------------------------------------}
 
 -- Disc represented by weight.
@@ -241,25 +243,36 @@ mostDiscs ((_,ds):xs)
   | length ds > mostDiscs xs = length ds
   | otherwise                = mostDiscs xs
 
-{- Removes the top-most disc (or discs if there are more than one at
-   the same height) from a board. -}
--- removeTop :: Board -> Board
+-- Removes the heighest disc(s) from a board.
+removeHeighestDiscs :: Board -> Board
+removeHeighestDiscs [] = []
+removeHeighestDiscs ((p,[]):xs) = (p,[]) : removeHeighestDiscs xs
+removeHeighestDiscs ((p,d:ds):xs)
+  | length (d:ds) > mostDiscs xs  = removeDisc p ((p,d:ds):xs)
+  | length (d:ds) == mostDiscs xs = (p,ds) : removeHeighestDiscs xs
+  | otherwise                     = (p,d:ds) : removeHeighestDiscs xs
 
 -- Draws discs at given height (0 is base). No disc is "|".
--- drawDiscsAtHeight :: Int -> Board -> String
--- drawDiscsAtHeight _ []          = "\n"
--- drawDiscsAtHeight n _
---   | n < 0                       = error "Disc height cannot be negative."
--- drawDiscsAtHeight n ((_,[]):xs) = "|" ++ drawDiscsAtHeight n xs
--- drawDiscsAtHeight n ((p,d:ds):xs)
---   | length (d:ds) - 1 < n  = "|" ++ drawDiscsAtHeight n xs
---   | length (d:ds) - 1 == n = show d ++ drawDiscsAtHeight n xs
---   | otherwise              = drawDiscsAtHeight n ((p,ds):xs)
+drawDiscsAtHeight :: Int -> Board -> String
+drawDiscsAtHeight _ []          = "\n"
+drawDiscsAtHeight n _
+  | n < 0                       = error "Disc height cannot be negative."
+drawDiscsAtHeight n ((_,[]):xs) = "|" ++ drawDiscsAtHeight n xs
+drawDiscsAtHeight n ((p,d:ds):xs)
+  | length (d:ds) - 1 == n = show d ++ drawDiscsAtHeight n xs
+  | otherwise              = drawDiscsAtHeight n ((p,ds):xs)
 
 -- Draws a board.
--- drawBoard :: Board -> String
--- drawBoard [] = "\n"
--- drawBoard b  = drawDiscsAtHeight (mostDiscs b) b ++ drawBoard (removeTop b)
+drawBoard :: Board -> String
+drawBoard [] = "\n"
+drawBoard b
+  | mostDiscs b == 0 = "\n"
+  | otherwise        = (drawDiscsAtHeight ((mostDiscs b) - 1) b) ++ (drawBoard (removeHeighestDiscs b))
+
+-- Draws a board after each move.
+visualizeMoves :: [Move] -> Board -> String
+visualizeMoves [] b     = "\n"
+visualizeMoves (m:ms) b = drawBoard (makeMove m b) ++ (visualizeMoves ms (makeMove m b))
 
 {-
 
