@@ -12,16 +12,6 @@
      - DO make all your functions total (sensible results for every
      input). -}
 
--- Validating Credit Card Numbers
-{- Steps:
-     - Double the value of every second digit beginning from the
-     right.
-       - Example: [1,3,8,6] becomes [2,3,16,6].
-     - Add the digits of the result.
-       - Example: [2,3,16,6] becomes 2+3+1+6+6 = 18.
-     - Calculate the remainder when the result is divided by 10.
-     - If the result is 0, the number is valid. -}
-
 
 
 {----------------------------------------------------------
@@ -156,6 +146,9 @@ hanoi n a b c = (hanoi (n - 1) a c b) `concatTwoLists` (hanoi 1 a b c) `concatTw
   hanoi results.
 
   Usage:
+    -- Checks legality of moves and yields final board.
+    makeMoves (hanoi n a b c) (assembleBoard n [a, b, c])
+    -- Yields a string representing the board after each move.
     putStr (visualizeMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
 ----------------------------------------------------------}
 
