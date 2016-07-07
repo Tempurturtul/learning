@@ -1,190 +1,128 @@
-{- Styleguide:
-     - DO use camelCase for function and variable names.
-     - DO use descriptive function names.
-     - DON'T use tabs.
-     - DO try to keep every line under 80 characters.
-     - DO give every top-level function a type signature. (It doesn't
-     hurt to give them to locally defined functions and constants as
-     well.)
-     - DO precede every top-level function by an explanatory comment.
-     - DO use -Wall (no warnings).
-     - DO use small functions and compose them to add complexity.
-     - DO make all your functions total (sensible results for every
-     input). -}
-
-
-
-{----------------------------------------------------------
-  Exercise 1: Find the digits of a number.
-----------------------------------------------------------}
-
--- Gets the last element from a list.
-getLast :: [a] -> a
-getLast []     = error "List cannot be empty."
-getLast (x:[]) = x
-getLast (x:xs) = getLast xs
-
--- Removes the last element from a list.
-removeLast :: [a] -> [a]
-removeLast []     = []
-removeLast (x:[]) = []
-removeLast (x:xs) = x : removeLast xs
-
--- Reverses a list.
-reverseList :: [a] -> [a]
-reverseList [] = []
-reverseList xs = getLast xs : reverseList (removeLast xs)
-
-{- Converts positive Integers to a list of digits with the digits
-   reversed. -}
-toDigitsRev :: Integer -> [Integer]
-toDigitsRev n
-  | n < 1     = []
-  | otherwise = mod n 10 : toDigitsRev (div n 10)
+-- Exercise 1 -------------------------------------------------------
 
 -- Converts positive Integers to a list of digits.
 toDigits :: Integer -> [Integer]
-toDigits n = reverseList (toDigitsRev n)
+toDigits n
+  | n < 1     = []
+  | otherwise = toDigits (div n 10) ++ [mod n 10]
 
+-- Converts positive Integers to a list of digits reversed.
+toDigitsRev :: Integer -> [Integer]
+toDigitsRev n = reverse (toDigits n)
 
+-- Exercise 2 -------------------------------------------------------
 
-{----------------------------------------------------------
-  Exercise 2: Double every other digit right to left.
-----------------------------------------------------------}
+-- Doubles every other digit left to right.
+doubleEveryOtherLTR :: [Integer] -> [Integer]
+doubleEveryOtherLTR []       = []
+doubleEveryOtherLTR (x:[])   = [x]
+doubleEveryOtherLTR (x:y:zs) = x : y*2 : doubleEveryOtherLTR zs
 
--- Doubles every other number starting from the left.
-doubleEveryOtherRev :: [Integer] -> [Integer]
-doubleEveryOtherRev [] = []
-doubleEveryOtherRev (x:[]) = [x]
-doubleEveryOtherRev (x:y:zs) = x : y * 2 : doubleEveryOtherRev zs
-
--- Doubles every other number starting from the right.
+-- Doubles every other digit right to left.
 doubleEveryOther :: [Integer] -> [Integer]
-doubleEveryOther xs = reverseList (doubleEveryOtherRev (reverseList xs))
+doubleEveryOther xs = reverse (doubleEveryOtherLTR (reverse xs))
 
+-- Exercise 3 -------------------------------------------------------
 
-
-{----------------------------------------------------------
-  Exercise 3: Calculate the sum of all digits.
-----------------------------------------------------------}
-
--- Calculates the sum of all digits.
+-- Sums digits.
 sumDigits :: [Integer] -> Integer
-sumDigits []     = 0
+sumDigits []  = 0
 sumDigits (x:xs)
-  | x < 10    = x + sumDigits xs
-  | otherwise = sumDigits (toDigits x) + sumDigits xs
+  | x > 9     = sumDigits (toDigits x) + sumDigits xs
+  | otherwise = x + sumDigits xs
 
+-- Exercise 4 -------------------------------------------------------
 
-
-{----------------------------------------------------------
-  Exercise 4: Determine whether a credit card number could be valid.
-----------------------------------------------------------}
-
--- Determines whether a credit card number could be valid.
+-- Checks if Integer could be a valid credit card number.
 validate :: Integer -> Bool
 validate n
   | n < 0     = False
   | otherwise = mod (sumDigits (doubleEveryOther (toDigits n))) 10 == 0
 
+-- Exercise 5 -------------------------------------------------------
 
-
-{----------------------------------------------------------
-  Exercise 5: The Towers of Hanoi.
-----------------------------------------------------------}
-
-{- Setup:
-     Discs of different sizes are stacked on the first of three pegs.
-     The objective is to move them all to the last peg.
-   Rules:
-     - May only move one disc at a time.
-     - A larger disc may never be stacked on top of a smaller one.
-   Solution for n discs from peg a to b using c as temporary storage:
-     - Move n - 1 discs from a to c using b as temporary storage.
-     - Move the top disc from a to b.
-     - Move n - 1 discs from c to b using a as temporary storage. -}
-
-{- These are type synonyms. They are more descriptive and help with
-   documentation. -}
+-- These are type synonyms.
+-- They are more descriptive and help with documentation.
 type Peg = String
 type Move = (Peg, Peg)
 
--- Concatenates two lists of the same type.
-concatTwoLists :: [a] -> [a] -> [a]
-concatTwoLists [] ys     = ys
-concatTwoLists (x:[]) ys = x : ys
-concatTwoLists (x:xs) ys = x : concatTwoLists xs ys
-
-{- Given the number of discs and names for the three pegs, returns
-   a list of moves to be performed to move the stack of discs from
-   the first peg to the second. -}
+-- Gets the solution to a Towers of Hanoi puzzle.
 hanoi :: Integer -> Peg -> Peg -> Peg -> [Move]
 hanoi 0 _ _ _ = []
-hanoi 1 a b _ = (a,b) : []
-hanoi 2 a b c = (a,c) : (a,b) : hanoi 1 c b a
-hanoi n a b c = (hanoi (n - 1) a c b) `concatTwoLists` (hanoi 1 a b c) `concatTwoLists` (hanoi (n - 1) c b a)
+hanoi n a b c = (hanoi (n-1) a c b) ++ [(a,b)] ++ (hanoi (n-1) c b a)
 
-{- Note on the above: I stumbled upon this answer while going through
-   successive cases looking for a pattern. I didn't expect it to
-   work to be honest. Playing with stackable measuring cups helped me
-   understand why it works. -}
+-- Exercise 6 -------------------------------------------------------
 
 
 
-{----------------------------------------------------------
-  Exercise 6 (Optional): Towers of Hanoi with four pegs.
-----------------------------------------------------------}
+-- Additional: Checking 5 & 6 ---------------------------------------
 
-{- Should solve in as few moves as possible.
-   Minimal solution with 3 pegs: 32767 moves for 15 pegs.
-   Minimal solution with 4 pegs: 129 moves for 15 pegs. -}
+-- Usage:
+--   solves (hanoi n a b c) (assembleBoard n [a, b, c])
+--   putStr (drawMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
 
-
-
-{----------------------------------------------------------
-  The below is dedicated to checking the validity of the
-  hanoi results.
-
-  Usage:
-    -- Checks legality of moves and yields final board.
-    makeMoves (hanoi n a b c) (assembleBoard n [a, b, c])
-    -- Yields a string representing the board after each move.
-    putStr (visualizeMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
-----------------------------------------------------------}
-
--- Disc represented by weight.
 type Disc = Integer
-type Tower = (Peg, [Disc])
-type Board = [Tower]
+type Board = [(Peg, [Disc])]
 
--- Whether or not a peg exists in a board.
+-- Assembles a new Towers of Hanoi Board.
+assembleBoard :: Integer -> [Peg] -> Board
+assembleBoard _ []     = []
+assembleBoard n (x:xs)
+  | n < 1     = (x, []) : assembleBoard 0 xs
+  | otherwise = (x, [1..n]) : assembleBoard 0 xs
+
+-- -- Gets all discs from the Hanoi board.
+getDiscs :: Board -> [Disc]
+getDiscs b = concat [xs | (_,xs) <- b]
+
+-- Checks if Integers only increase.
+onlyIncreases :: [Integer] -> Bool
+onlyIncreases []     = True
+onlyIncreases (_:[]) = True
+onlyIncreases (x:xs) = x < head xs && onlyIncreases xs
+
+-- Checks if a Towers of Hanoi board is solved. (Discs moved from first to second peg.)
+solved :: Board -> Bool
+solved []            = error "Cannot solve an empty board."
+solved (_:[])        = error "Cannot solve a board with only one peg."
+solved (x:(_,ds):zs) = getDiscs (x:zs) == [] && onlyIncreases ds
+
+-- Checks for the peg on the board.
 pegExists :: Peg -> Board -> Bool
 pegExists _ [] = False
 pegExists a ((p,_):xs)
   | a == p    = True
   | otherwise = pegExists a xs
 
--- Whether or not pegs exist in a board.
+-- Checks for pegs on the board.
 pegsExist :: [Peg] -> Board -> Bool
 pegsExist [] _     = True
 pegsExist (x:xs) b = pegExists x b && pegsExist xs b
 
--- Whether or not there is at least one disc on the peg.
+-- Checks for at least one disc on the peg.
 discOnPeg :: Peg -> Board -> Bool
-discOnPeg a [] = False
+discOnPeg _ [] = False
 discOnPeg a ((p,ds):xs)
   | a == p    = ds /= []
   | otherwise = discOnPeg a xs
 
--- The top disc from a peg.
+-- The top disc from the peg.
 topDisc :: Peg -> Board -> Disc
 topDisc _ [] = error "Peg must exist in board."
 topDisc a ((p,[]):xs)
   | a == p    = error "No disc on peg."
   | otherwise = topDisc a xs
-topDisc a ((p,d:ds):xs)
+topDisc a ((p,d:_):xs)
   | a == p    = d
   | otherwise = topDisc a xs
+
+-- Checks if a hanoi move is legal.
+legalMove :: Move -> Board -> Bool
+legalMove (x,y) b
+  | not (pegsExist [x,y] b) = False  -- Can't move to a missing peg.
+  | not (discOnPeg x b)     = False  -- Can't move a missing disc.
+  | not (discOnPeg y b)     = True   -- Can always move a disc to an empty peg.
+  | otherwise               = (topDisc x b) < (topDisc y b)
 
 -- Adds a disc to a peg and yields an updated board.
 addDisc :: Disc -> Peg -> Board -> Board
@@ -203,31 +141,18 @@ removeDisc a ((p,d:ds):xs)
   | a == p    = ((p,ds):xs)
   | otherwise = (p,d:ds) : removeDisc a xs
 
--- Checks the legality of a move.
-legalMove :: Move -> Board -> Bool
-legalMove (x,y) b
-  | not (pegsExist [x,y] b) = False
-  | not (discOnPeg x b)     = False
-  | not (discOnPeg y b)     = True
-  | otherwise               = (topDisc x b) < (topDisc y b)
-
--- Makes a move.
+-- Makes a move on a Towers of Hanoi board.
 makeMove :: Move -> Board -> Board
 makeMove (x,y) b
   | legalMove (x,y) b = addDisc (topDisc x b) y (removeDisc x b)
   | otherwise         = error "Illegal move."
 
--- Makes moves.
-makeMoves :: [Move] -> Board -> Board
-makeMoves [] b     = b
-makeMoves (m:ms) b = makeMoves ms (makeMove m b)
+-- Checks if moves solve a Towers of Hanoi puzzle.
+solves :: [Move] -> Board -> Bool
+solves [] b      = solved b
+solves (x:xs) b  = solves xs (makeMove x b)
 
--- Assembles a board with discs in starting position.
-assembleBoard :: Integer -> [Peg] -> Board
-assembleBoard _ []     = []
-assembleBoard n (p:ps)
-  | n > 0     = (p,[1..n]) : assembleBoard 0 ps
-  | otherwise = (p,[]) : assembleBoard 0 ps
+-- Additional: Visualizing 5 & 6 ------------------------------------
 
 -- Gets the biggest number of discs on a peg.
 mostDiscs :: Board -> Int
@@ -245,34 +170,24 @@ removeHeighestDiscs ((p,d:ds):xs)
   | length (d:ds) == mostDiscs xs = (p,ds) : removeHeighestDiscs xs
   | otherwise                     = (p,d:ds) : removeHeighestDiscs xs
 
--- Draws discs at given height (0 is base). No disc is "|".
+-- Draws discs at given height as a string (0 is base, no disc is "|").
 drawDiscsAtHeight :: Int -> Board -> String
-drawDiscsAtHeight _ []          = "\n"
+drawDiscsAtHeight _ []          = "\n"  -- Nothing to draw.
 drawDiscsAtHeight n _
   | n < 0                       = error "Disc height cannot be negative."
-drawDiscsAtHeight n ((_,[]):xs) = "|" ++ drawDiscsAtHeight n xs
+drawDiscsAtHeight n ((_,[]):xs) = "|" ++ drawDiscsAtHeight n xs  -- No discs on peg.
 drawDiscsAtHeight n ((p,d:ds):xs)
-  | length (d:ds) - 1 == n = show d ++ drawDiscsAtHeight n xs
-  | otherwise              = drawDiscsAtHeight n ((p,ds):xs)
+  | length (d:ds) - 1 == n = show d ++ drawDiscsAtHeight n xs  -- Draw this disc.
+  | otherwise              = drawDiscsAtHeight n ((p,ds):xs)   -- Wrong disc.
 
--- Draws a board.
+-- Draws a Towers of Hanoi board as a string.
 drawBoard :: Board -> String
 drawBoard [] = "\n"
 drawBoard b
-  | mostDiscs b == 0 = "\n"
+  | mostDiscs b == 0 = "\n"  -- Done drawing.
   | otherwise        = (drawDiscsAtHeight ((mostDiscs b) - 1) b) ++ (drawBoard (removeHeighestDiscs b))
 
--- Draws a board after each move.
-visualizeMoves :: [Move] -> Board -> String
-visualizeMoves [] b     = "\n"
-visualizeMoves (m:ms) b = drawBoard (makeMove m b) ++ (visualizeMoves ms (makeMove m b))
-
-{-
-
-0 =
-1 =                                                            [(a,b)]
-2 = [                        (a,c)                        ] -- [(a,b)] -- [                        (c,b)                        ]
-3 = [                (a,b) : (a,c) : (b:c)                ] -- [(a,b)] -- [                (c,a) : (c,b) : (a,b)                ]
-4 = [(a,c) : (a,b) : (c,b) : (a,c) : (b,a) : (b,c) : (a,c)] -- [(a,b)] -- [(c,b) : (c,a) : (b,a) : (c,b) : (a,c) : (a,b) : (c,b)]
-
--}
+-- Draws a Towers of Hanoi board as a string after each move.
+drawMoves :: [Move] -> Board -> String
+drawMoves [] _     = "\n"  -- Done drawing.
+drawMoves (x:xs) b = drawBoard (makeMove x b) ++ (drawMoves xs (makeMove x b))
