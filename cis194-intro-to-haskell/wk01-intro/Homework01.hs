@@ -53,13 +53,13 @@ hanoi n a b c = (hanoi (n-1) a c b) ++ [(a,b)] ++ (hanoi (n-1) c b a)
 
 -- Exercise 6 -------------------------------------------------------
 
-
-
 -- Additional: Checking 5 & 6 ---------------------------------------
 
 -- Usage:
---   solves (hanoi n a b c) (assembleBoard n [a, b, c])
---   putStr (drawMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
+--   Do the moves solve the board? (Also checks move legality.)
+--     solves (hanoi n a b c) (assembleBoard n [a, b, c])
+--   Show me each move.
+--     putStr (drawMoves (hanoi n a b c) (assembleBoard n [a, b, c]))
 
 type Disc = Integer
 type Board = [(Peg, [Disc])]
@@ -143,14 +143,19 @@ removeDisc a ((p,d:ds):xs)
 
 -- Makes a move on a Towers of Hanoi board.
 makeMove :: Move -> Board -> Board
-makeMove (x,y) b
-  | legalMove (x,y) b = addDisc (topDisc x b) y (removeDisc x b)
-  | otherwise         = error "Illegal move."
+makeMove (x,y) b = addDisc (topDisc x b) y (removeDisc x b)
+
+-- Checks if hanoi moves are legal.
+legalMoves :: [Move] -> Board -> Bool
+legalMoves [] _     = True
+legalMoves (x:xs) b = legalMove x b && legalMoves xs (makeMove x b)
 
 -- Checks if moves solve a Towers of Hanoi puzzle.
 solves :: [Move] -> Board -> Bool
 solves [] b      = solved b
-solves (x:xs) b  = solves xs (makeMove x b)
+solves (x:xs) b
+  | not (legalMove x b) = False  -- Illegal move, solution is false.
+  | otherwise           = solves xs (makeMove x b)
 
 -- Additional: Visualizing 5 & 6 ------------------------------------
 
