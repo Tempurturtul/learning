@@ -1,6 +1,8 @@
 {-# OPTIONS_GHC -Wall #-}
 module Golf where
 
+import Data.List
+
 -- Exercise 1 -------------------------------------------------------
 
 -- Gets every x from a list of (x, m) pairs where mod m n == 0.
@@ -49,5 +51,59 @@ localMaxima _        = []
 
 -- Exercise 3 -------------------------------------------------------
 
+-- Gets elements from a list that are equal to a given element.
+getFrom :: Eq a => [a] -> a -> [a]
+getFrom xs n = filter ((==) n) xs
+
+-- Plots a single point depending on its presence in a list.
+plotPoint :: Eq a => [a] -> a -> String
+plotPoint xs n
+  | any ((==) n) xs = "*"
+  | otherwise       = " "
+
+-- Plots a line of points from 0 to 9.
+plotLine :: [Integer] -> String
+plotLine xs = concatMap (plotPoint xs) [0..9] ++ "\n"
+
 -- Takes a list from 0 to 9 and outputs a vertical histogram.
--- histogram :: [Integer] -> String
+histogram :: [Integer] -> String
+histogram xs = concatMap plotLine (reverse (transpose (map (getFrom xs) [0..9]))) ++ "==========\n0123456789\n"
+
+{- Explanatory Comment:
+
+   The getFrom function is mapped over the Ints 0 to 9, with xs as
+   its first argument. This yields a list of lists, the first of
+   which is a list of all 0s in xs, and the last of which is a list
+   of all 9s in xs. This list of lists is then passed to transpose,
+   which yields a new list of lists, the first of which is a list of
+   all elements that occur at least once in the previous list, and
+   the last of which is all elements that occur the maximum number of
+   times (compared to any other element) in the previous list.
+
+   At this point we have a list of lists where the first list
+   contains all elements of the original list xs that occur at least
+   n times, where n is equal to the largest number of duplicates
+   existing in xs + 1, and the last list contains all elements of the
+   original list xs that occur at least 1 time (that is, every
+   unique element in xs).
+
+   This list is then reversed and passed as the second argument to
+   concatMap, where the first argument is the plotLine function. This
+   yields the results of each call to plotLine, Strings, concatenated
+   together into a single String, which is then concatenated to the
+   constant base of the histogram.
+
+   Regarding the plotLine function:
+     The plotLine function takes an Integer list representing a row
+     of data from the histogram, and uses concatMap and the plotPoint
+     function along with the list of Ints 0 to 9 to produce a string
+     with 10 characters. In the case of each character, the plotPoint
+     function receives the Integer list representing data from the
+     histogram and an Integer representing the column corresponding
+     to a single piece of data. If the piece of data is present in
+     the list, plotPoint outputs an asterisk, otherwise it outputs
+     whitespace.
+
+     The results of the concatMap call with plotPoint, the data row,
+     and [0..9] are then themselves concatenated onto a string
+     representing a newline. -}
