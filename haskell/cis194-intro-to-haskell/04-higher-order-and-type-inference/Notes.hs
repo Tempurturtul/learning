@@ -151,7 +151,8 @@ length''' = fold 0 (\_ -> (1+))
 --   foldr f z [a,b,c] == a `f` (b `f` (c `f` z))
 --   foldl f z [a,b,c] == ((z `f` a) `f` b) `f` c
 
--- Should use foldl' from Data.List instead generally (more efficient).
+-- Should use foldl' from Data.List instead of foldl generally (more efficient).
+
 -- Note: The Haskell wiki advocates foldr in most cases.
 --   https://wiki.haskell.org/Foldr_Foldl_Foldl'
 
