@@ -57,3 +57,17 @@ foldTree :: [a] -> Tree a
 foldTree = foldr insert Leaf
 
 -- Exercise 3 -------------------------------------------------------
+
+-- Returns True only if there are an odd number of True values.
+-- (Must use a fold.)
+xor :: [Bool] -> Bool
+xor = foldr (\x y -> x /= y) False . filter (==True)
+
+-- Behaves identically to standard map function.
+map' :: (a -> b) -> [a] -> [b]
+map' f = foldr (\x zs -> f x : zs) []
+
+-- OPTIONAL
+-- Behaves identically to standard foldl function.
+-- myFoldl :: (a -> b -> a) -> a -> [b] -> a
+-- myFoldl f base xs = foldr (\x z -> ) base ()
