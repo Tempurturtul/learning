@@ -31,6 +31,29 @@ data Tree a = Leaf
             | Node Integer (Tree a) a (Tree a)
   deriving (Show, Eq)
 
--- Generates a balanced binary tree using foldr.
--- foldTree :: [a] -> Tree a
--- foldTree = foldr (\x z -> ) Leaf
+-- Gets the depth of a Tree.
+depth :: Tree a -> Integer
+depth Leaf = -1
+depth (Node n _ _ _) = n
+
+-- Gets the number of nodes in a Tree.
+nodes :: Tree a -> Integer
+nodes Leaf = 0
+nodes (Node _ l _ r) = 1 + nodes l + nodes r
+
+-- Inserts a node into a Tree.
+insert :: a -> Tree a -> Tree a
+insert x Leaf = Node 0 Leaf x Leaf
+insert x (Node _ l y r)
+  | nl <= nr  = Node (depth newL + 1) newL y r
+  | otherwise = Node (depth newR + 1) l y newR
+  where nl = nodes l
+        nr = nodes r
+        newL = insert x l
+        newR = insert x r
+
+-- Generates a balanced Tree using foldr.
+foldTree :: [a] -> Tree a
+foldTree = foldr insert Leaf
+
+-- Exercise 3 -------------------------------------------------------
