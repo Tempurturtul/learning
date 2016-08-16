@@ -68,5 +68,7 @@ map' f = foldr (\x zs -> f x : zs) []
 
 -- OPTIONAL
 -- Behaves identically to standard foldl function.
--- myFoldl :: (a -> b -> a) -> a -> [b] -> a
--- myFoldl f base xs = foldr (\x z -> ) base ()
+myFoldl :: (a -> b -> a) -> a -> [b] -> a
+myFoldl f base xs = foldr (\x z -> f z x) base (reverse xs)
+
+-- Exercise 4 -------------------------------------------------------
