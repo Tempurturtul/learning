@@ -72,3 +72,10 @@ myFoldl :: (a -> b -> a) -> a -> [b] -> a
 myFoldl f base xs = foldr (\x z -> f z x) base (reverse xs)
 
 -- Exercise 4 -------------------------------------------------------
+
+-- Finds all odd primes up to 2n + 2 using the Sieve of Sundaram.
+-- (Must use function composition.)
+sieveSundaram :: Integer -> [Integer]
+sieveSundaram n = map (\x -> 2*x+1) . filter (\x -> notElem x $ excluded) $ [1..n]
+                where
+                  excluded = [i+j+2*i*j | i <- [1..n], j <- [1..n], i <= j, i+j+2*i*j <= n]
