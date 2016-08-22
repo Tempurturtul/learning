@@ -36,47 +36,51 @@ class Expr a where
   mul :: a -> a -> a
 
 instance Expr ExprT where
-  lit n     = Lit n
-  add e1 e2 = Add e1 e2
-  mul e1 e2 = Mul e1 e2
+  lit = Lit
+  add = Add
+  mul = Mul
 
 -- Exercise 4 -------------------------------------------------------
 
 -- Works like the original calculator.
 instance Expr Integer where
-  lit n     = n
-  add e1 e2 = (+) e1 e2
-  mul e1 e2 = (*) e1 e2
+  lit = id
+  add = (+)
+  mul = (*)
 
 -- <= 0 is False, add is logical or, mul is logical and.
 instance Expr Bool where
-  lit n     = n > 0
-  add e1 e2 = e1 || e2
-  mul e1 e2 = e1 && e2
+  lit = (> 0)
+  add = (||)
+  mul = (&&)
 
 newtype MinMax = MinMax Integer deriving (Eq, Show, Ord)
 newtype Mod7   = Mod7 Integer deriving (Eq, Show, Num, Integral, Enum, Real, Ord)
 
 -- add is the max function, mul is the min function.
 instance Expr MinMax where
-  lit n     = MinMax n
-  add e1 e2 = max e1 e2
-  mul e1 e2 = min e1 e2
+  lit = MinMax
+  add = max
+  mul = min
 
 -- Everything is done mod 7.
 instance Expr Mod7 where
   lit n     = Mod7 (mod n 7)
-  add e1 e2 = (+) e1 e2 `mod` 7
-  mul e1 e2 = (*) e1 e2 `mod` 7
+  add e1 e2 = (`mod` 7) $ (+) e1 e2
+  mul e1 e2 = (`mod` 7) $ (*) e1 e2
 
 -- Tests:
 testExp :: Expr a => Maybe a
 testExp = parseExp lit add mul "(3 * -4) + 5"
 
-testInteger = testExp :: Maybe Integer
-testBool    = testExp :: Maybe Bool
-testMM      = testExp :: Maybe MinMax
-testSat     = testExp :: Maybe Mod7
+testInteger :: Maybe Integer
+testInteger = testExp
+testBool    :: Maybe Bool
+testBool    = testExp
+testMM      :: Maybe MinMax
+testMM      = testExp
+testSat     :: Maybe Mod7
+testSat     = testExp
 
 -- Exercise 5 -------------------------------------------------------
 
@@ -87,7 +91,7 @@ instance Expr S.Program where
 
 -- Compiles strings into programs to be run on the custom CPU in S.
 compile :: String -> Maybe S.Program
-compile s = parseExp lit add mul s
+compile = parseExp lit add mul
 
 -- Exercise 6 (Optional) --------------------------------------------
 
@@ -95,15 +99,15 @@ class HasVars a where
   var :: String -> a
 
 instance Expr V.VarExprT where
-  lit n     = V.Lit n
-  add e1 e2 = V.Add e1 e2
-  mul e1 e2 = V.Mul e1 e2
+  lit = V.Lit
+  add = V.Add
+  mul = V.Mul
 
 instance HasVars V.VarExprT where
-  var s = V.Var s
+  var = V.Var
 
 instance HasVars (M.Map String Integer -> Maybe Integer) where
-  var s = M.lookup s
+  var = M.lookup
 
 -- Performs the operation if both numbers are Just, otherwise yields Nothing.
 maybeOp :: Num a => (a -> a -> a) -> Maybe a -> Maybe a -> Maybe a
