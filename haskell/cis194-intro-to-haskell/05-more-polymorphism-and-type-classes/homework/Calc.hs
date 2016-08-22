@@ -7,7 +7,9 @@ module Calc where
 import ExprT
 import Parser
 import Data.Maybe
-import qualified StackVM
+import qualified StackVM         as S
+import qualified VarExprT        as V
+import qualified Data.Map.Strict as M
 
 -- Exercise 1 -------------------------------------------------------
 
@@ -37,13 +39,6 @@ instance Expr ExprT where
   lit n     = Lit n
   add e1 e2 = Add e1 e2
   mul e1 e2 = Mul e1 e2
-
-{-
-data ExprT = Lit Integer
-           | Add ExprT ExprT
-           | Mul ExprT ExprT
-  deriving (Show, Eq)
--}
 
 -- Exercise 4 -------------------------------------------------------
 
@@ -85,13 +80,54 @@ testSat     = testExp :: Maybe Mod7
 
 -- Exercise 5 -------------------------------------------------------
 
-instance Expr StackVM.Program where
-  lit n     = [StackVM.PushI n]
-  add e1 e2 = [StackVM.Add] ++ e1 ++ e2
-  mul e1 e2 = [StackVM.Mul] ++ e1 ++ e2
+instance Expr S.Program where
+  lit n     = [S.PushI n]
+  add e1 e2 = [S.Add] ++ e1 ++ e2
+  mul e1 e2 = [S.Mul] ++ e1 ++ e2
 
--- Compiles strings into programs to be run on the custom CPU in StackVM.
-compile :: String -> Maybe StackVM.Program
+-- Compiles strings into programs to be run on the custom CPU in S.
+compile :: String -> Maybe S.Program
 compile s = parseExp lit add mul s
 
 -- Exercise 6 (Optional) --------------------------------------------
+
+class HasVars a where
+  var :: String -> a
+
+instance Expr V.VarExprT where
+  lit n     = V.Lit n
+  add e1 e2 = V.Add e1 e2
+  mul e1 e2 = V.Mul e1 e2
+
+instance HasVars V.VarExprT where
+  var s = V.Var s
+
+instance HasVars (M.Map String Integer -> Maybe Integer) where
+  var s = M.lookup s
+
+-- Performs the operation if both numbers are Just, otherwise yields Nothing.
+maybeOp :: Num a => (a -> a -> a) -> Maybe a -> Maybe a -> Maybe a
+maybeOp f x y
+  | isJust x && isJust y = Just $ f (fromJust x) (fromJust y)
+  | otherwise            = Nothing
+
+instance Expr (M.Map String Integer -> Maybe Integer) where
+  lit n     = (\_ -> Just n)
+  add e1 e2 = (\vs -> maybeOp (+) (e1 vs) (e2 vs))
+  mul e1 e2 = (\vs -> maybeOp (*) (e1 vs) (e2 vs))
+
+withVars :: [(String, Integer)]
+         -> (M.Map String Integer -> Maybe Integer)
+         -> Maybe Integer
+withVars vs expr = expr $ M.fromList vs
+
+-- Tests:
+
+-- withVars [("x", 6)] $ add (lit 3) (var "x")
+--   Just 9
+
+-- withVars [("x", 6)] $ add (lit 3) (var "y")
+--   Nothing
+
+-- withVars [("x", 6), ("y", 3)] $ mul (var "x") (add (var "y") (var "x"))
+--   Just 54
