@@ -11,4 +11,9 @@ fib n = (+) (fib $ n-1) (fib $ n-2)
 
 -- Defines the infinite list of Fibonacci numbers.
 fibs1 :: [Integer]
-fibs1 = [fib x | x <- [0..]]
+fibs1 = map fib [0..]
+
+-- Exercise 2 -------------------------------------------------------
+
+-- More efficient version of fibs1.
+-- fibs2 :: [Integer]
