@@ -28,3 +28,30 @@ fib2 n = last $ fibs !! (n - 1)
 -- More efficient version of fibs1.
 fibs2 :: [Integer]
 fibs2 = map fib2 [0..]
+
+-- Exercise 3 -------------------------------------------------------
+
+data Stream a = Cons a (Stream a)
+
+instance Show a => Show (Stream a) where
+  show s = show $ take 20 (streamToList s)
+
+-- Converts a Stream to an infinite list.
+streamToList :: Stream a -> [a]
+streamToList (Cons x xs) = [x] ++ streamToList xs
+
+-- Exercise 4 -------------------------------------------------------
+
+-- Generates a Stream containing copies of the given element.
+streamRepeat :: a -> Stream a
+streamRepeat x = Cons x (streamRepeat x)
+
+-- Applies a function to every element of a Stream.
+streamMap :: (a -> b) -> Stream a -> Stream b
+streamMap f (Cons x xs) = Cons (f x) (streamMap f xs)
+
+-- Generates a Stream from a "seed" using an "unfolding rule" function.
+streamFromSeed :: (a -> a) -> a -> Stream a
+streamFromSeed f x = Cons x (streamFromSeed f (f x))
+
+-- Exercise 5 -------------------------------------------------------
