@@ -1,4 +1,6 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# OPTIONS_GHC -fno-warn-missing-methods #-}
 module Fibonacci where
 
 -- Exercise 1 -------------------------------------------------------
@@ -55,3 +57,71 @@ streamFromSeed :: (a -> a) -> a -> Stream a
 streamFromSeed f x = Cons x (streamFromSeed f (f x))
 
 -- Exercise 5 -------------------------------------------------------
+
+-- Infinite list of natural numbers.
+nats :: Stream Integer
+nats = streamFromSeed ((+) 1) 0
+
+-- Alternates elements from two streams.
+-- (Used by ruler.)
+interleaveStreams :: Stream a -> Stream a -> Stream a
+interleaveStreams (Cons x xs) ys = Cons x (interleaveStreams ys xs)
+
+-- The nth element (from 1) is the largest power of 2 that evenly divides n.
+-- (Pattern: zeros interleaved with ones interleaved with twos...)
+ruler :: Stream Integer
+ruler = incrementingInterleaved 0
+      where
+        incrementingInterleaved = (\n -> interleaveStreams (streamRepeat n) (incrementingInterleaved (n+1)))
+
+-- Exercise 6 (Optional) --------------------------------------------
+
+-- Use streams of Integers to compute Fibonacci numbers.
+
+-- Work with generating functions of the form:
+-- a_0 + a_1(t) + a_2(t^2) + ... + a_n(t^n) + ...
+--   where t is just a "formal parameter" (placeholder).
+--         and all the coefficients a_i are integers.
+
+-- t = 0 + 1t + 0t^2 + 0t^3 + ...
+t :: Stream Integer
+t = Cons 0 (Cons 1 (streamRepeat 0))
+
+instance Num (Stream Integer) where
+  fromInteger = (\n -> Cons n (streamRepeat 0))
+  negate      = streamMap (negate)
+  (+)         = (\(Cons x xs) (Cons y ys) -> Cons (x+y) (xs + ys))
+  {- Regarding multiplication:
+
+     A*B == (a_0 + x * A')B
+         == a_0 * B + x * A' * B
+         == a_0(b_0 + x * B') + x * A' * B
+         == a_0 * b_0 + x(a_0 * B' + A' * B)
+
+     (N'  --> Tail of n.)
+     (n_m --> n sub m.) -}
+  (*)         = (\(Cons x xs) (Cons y ys) ->
+                  Cons (x * y) ((streamMap ((*) x) ys) + (xs * (Cons y ys))))
+
+instance Fractional (Stream Integer) where
+  {- Regarding division:
+
+     A/B == Q
+         == (a_0 / b_0) + x((1 / b_0) * (A' - Q * B')) -}
+  (/) = (\(Cons x xs) (Cons y ys) ->
+          Cons
+            (div x y)
+            (streamMap ((*) (div 1 y)) (xs - ((Cons x xs) / (Cons y ys)) * ys)))
+
+-- Fibonacci numbers using a generating function.
+{- From instructor notes:
+
+   F(x) = F_0 + f_1 * x + F_2 * x^2 + F_3 * x^3 + ...
+
+   x + x * F(x) + x^2 * F(x) = F(x)
+
+   x = F(x) - x * F(x) - x^2 * F(x)
+
+   F(x) = x / (1 - x - x^2) -}
+fibs3 :: Stream Integer
+fibs3 = t / (1 - t - t^(2::Integer))
