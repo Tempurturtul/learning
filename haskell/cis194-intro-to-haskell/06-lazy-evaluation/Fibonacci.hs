@@ -125,3 +125,22 @@ instance Fractional (Stream Integer) where
    F(x) = x / (1 - x - x^2) -}
 fibs3 :: Stream Integer
 fibs3 = t / (1 - t - t^(2::Integer))
+
+-- Exercise 7 (Optional) --------------------------------------------
+
+-- 2x2 Integer matrix.
+data Matrix = Matrix Integer Integer Integer Integer
+  deriving Show
+
+instance Num Matrix where
+  (*) = (\(Matrix aa ab ba bb) (Matrix xx xy yx yy) ->
+          Matrix (aa * xx + ab * yx) (aa * xy + ab * yy)
+                 (ba * xx + bb * yx) (ba * xy + bb * yy))
+
+-- Calculates nth Fibonacci number via matrices.
+-- O(log n)
+fib4 :: Integer -> Integer
+fib4 0 = 0
+fib4 n = project $ f^n
+       where f = Matrix 1 1 1 0
+             project = (\(Matrix _ x _ _) -> x)
