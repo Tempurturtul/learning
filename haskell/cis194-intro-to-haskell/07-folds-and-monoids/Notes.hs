@@ -1,3 +1,5 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 {----------------------------------------------------------
   Folds, Again
 ----------------------------------------------------------}
@@ -97,3 +99,69 @@ numLiterals = exprTFold (const 1) (+) (+)
 {----------------------------------------------------------
   Monoids
 ----------------------------------------------------------}
+
+class Monoid' m where
+  mempty'  :: m
+  mappend' :: m -> m -> m
+
+  mconcat' :: [m] -> m
+  mconcat' = foldr mappend' mempty'
+
+-- Synonym for mappend'.
+(<>) :: Monoid' m => m -> m -> m
+(<>) = mappend'
+
+{-
+  Regarding Monoid':
+  - mempty' is an identity for <>
+  - <> is associative
+
+  For example, for all x, y, and z:
+    1. mempty' <> x == x
+    2. x <> mempty' == x
+    3. (x <> y) <> z == x <> (y <> z)
+-}
+
+-- Lists form a monoid under concatenation:
+instance Monoid' [a] where
+  mempty'  = []
+  mappend' = (++)
+
+-- newtype for use with monoid.
+newtype Sum a = Sum a
+  deriving (Eq, Ord, Num, Show)
+
+getSum :: Sum a -> a
+getSum (Sum a) = a
+
+instance Num a => Monoid' (Sum a) where
+  mempty'  = Sum 0
+  mappend' = (+)
+
+-- newtype for use with monoid.
+newtype Product a = Product a
+  deriving (Eq, Ord, Num, Show)
+
+getProduct :: Product a -> a
+getProduct (Product a) = a
+
+instance Num a => Monoid' (Product a) where
+  mempty'  = Product 1
+  mappend' = (*)
+
+lst :: [Integer]
+lst = [1,5,8,23,423,99]
+
+-- Gets the product of the list of Integers lst using mconcat'.
+prod :: Integer
+prod = getProduct . mconcat' . map Product $ lst
+
+-- Pairs form a monoid as long as the individual components do:
+
+instance (Monoid' a, Monoid' b) => Monoid' (a,b) where
+  mempty'                = (mempty', mempty')
+  (a,b) `mappend'` (c,d) = (a `mappend'` c, b `mappend'` d)
+
+-- Challenge: Instance of Monoid' for Bool.
+
+-- Challenge: Instance of Monoid' for function types.
