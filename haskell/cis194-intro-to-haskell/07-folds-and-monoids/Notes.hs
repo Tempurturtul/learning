@@ -214,3 +214,4 @@ instance Monoid' OnlyOne where
   mappend' (OnlyOne a) (OnlyOne b) = OnlyOne (a /= b)
 
 -- Challenge: Instance of Monoid' for function types.
+-- (Need to more thoroughly understand Functor and Applicative?)
