@@ -164,4 +164,53 @@ instance (Monoid' a, Monoid' b) => Monoid' (a,b) where
 
 -- Challenge: Instance of Monoid' for Bool.
 
+-- FIRST ATTEMPT
+
+-- newtype And = And Bool
+--   deriving (Eq, Show)
+--
+-- getAnd :: And -> Bool
+-- getAnd (And a) = a
+--
+-- instance Monoid' And where
+--   mempty'      = And True
+--   mappend' a b = And $ (getAnd a) && (getAnd b)
+--
+-- newtype Or = Or Bool
+--   deriving (Eq, Show)
+--
+-- getOr :: Or -> Bool
+-- getOr (Or a) = a
+--
+-- instance Monoid' Or where
+--   mempty'      = Or False
+--   mappend' a b = Or $ (getOr a) || (getOr b)
+
+-- SECOND ATTEMPT
+-- (Adapted from: https://en.wikibooks.org/wiki/Haskell/Solutions/Monoids)
+
+-- AND
+newtype All = All Bool
+  deriving (Eq, Show)
+
+instance Monoid' All where
+  mempty'                  = All True
+  mappend' (All a) (All b) = All (a && b)
+
+-- OR
+newtype Any = Any Bool
+  deriving (Eq, Show)
+
+instance Monoid' Any where
+  mempty'                  = Any False
+  mappend' (Any a) (Any b) = Any (a || b)
+
+-- XOR
+newtype OnlyOne = OnlyOne Bool
+  deriving (Eq, Show)
+
+instance Monoid' OnlyOne where
+  mempty'                  = OnlyOne False
+  mappend' (OnlyOne a) (OnlyOne b) = OnlyOne (a /= b)
+
 -- Challenge: Instance of Monoid' for function types.
