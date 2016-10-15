@@ -2,15 +2,16 @@ import React from 'react';
 
 class App extends React.Component {
   render() {
-    // Using JSX:
-    return <h1>Hello World</h1>
-
-    // Alternatively without using JSX:
-    // return React.createElement('h1', null, 'Hello Guys'); // element, props, content
+    /* If returning multiple elements, must wrap them in a single node.
+     * The parantheses are optional, but if excluded the first tag must
+     * immediately follow the return. */
+    return (
+      <div>
+        <h1>Hello World</h1>
+        <b>Bold</b>
+      </div>
+    );
   }
 }
-
-// Stateless function component.
-// const App = () => <h1>Hello Eggheads</h1>
 
 export default App;
