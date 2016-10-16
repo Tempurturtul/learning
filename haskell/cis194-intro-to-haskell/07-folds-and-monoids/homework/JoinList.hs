@@ -68,3 +68,15 @@ dropJ n (Append b l r)
   where s  = getSize . size $ b
         ls = getSize . size . tag $ l
 dropJ _ _ = Empty
+
+-- Returns the first n elements from a JoinList.
+takeJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+takeJ n (Single b a)
+  | n > 0 = Single b a
+takeJ n (Append b l r)
+  | n >= s    = (Append b l r)
+  | n >= ls   = l +++ takeJ (n - ls) r
+  | otherwise = takeJ n l
+  where s  = getSize . size $ b
+        ls = getSize . size . tag $ l
+takeJ _ _ = Empty
