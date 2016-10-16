@@ -215,3 +215,9 @@ instance Monoid' OnlyOne where
 
 -- Challenge: Instance of Monoid' for function types.
 -- (Need to more thoroughly understand Functor and Applicative?)
+
+-- mempty'  = id  ?
+-- mappend' = (.) ?
+
+-- Above is to say: at empty, use a function that returns it's arguments;
+-- and at append, use function composition to compose the two functions.
