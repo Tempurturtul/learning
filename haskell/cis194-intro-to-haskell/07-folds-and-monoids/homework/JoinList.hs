@@ -2,7 +2,6 @@
 module JoinList where
 
 import Sized
-import Data.Maybe
 
 data JoinList m a = Empty
                   | Single m a
@@ -38,24 +37,7 @@ tag (Append m _ _) = m
 
 -- Exercise 2 -------------------------------------------------------
 
--- Finds the JoinList element at the specified index.
-indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
-indexJ i _
-  | i < 0      = Nothing
-indexJ _ Empty = Nothing
-indexJ i (Single _ a)
-  | i == 0     = Just a
-  | otherwise  = Nothing
-indexJ i (Append b l r)
-  | i > s - 1      = Nothing
-  | isJust lResult = lResult
-  | otherwise      = rResult
-  where s       = getSize . size $ b
-        ls      = getSize . size . tag $ l
-        lResult = indexJ i l
-        rResult = indexJ (i - ls) r
-
-{- Example JoinList for indexJ:
+{- Example JoinList:
      Append (Size 4)
        (Append (Size 3)
          (Single (Size 1) 'y')
@@ -63,3 +45,26 @@ indexJ i (Append b l r)
            (Single (Size 1) 'e')
            (Single (Size 1) 'a')))
        (Single (Size 1) 'h') -}
+
+-- Finds the JoinList element at the specified index.
+indexJ :: (Sized b, Monoid b) => Int -> JoinList b a -> Maybe a
+indexJ 0 (Single _ a) = Just a
+indexJ i (Append b l r)
+  | i >= s    = Nothing
+  | i < ls    = indexJ i l
+  | otherwise = indexJ (i - ls) r
+  where s  = getSize . size $ b
+        ls = getSize . size . tag $ l
+indexJ _ _ = Nothing
+
+-- Drops the first n elements from a JoinList.
+dropJ :: (Sized b, Monoid b) => Int -> JoinList b a -> JoinList b a
+dropJ n jl
+  | n <= 0 = jl
+dropJ n (Append b l r)
+  | n >= s    = Empty
+  | n >= ls   = dropJ (n - ls) r
+  | otherwise = dropJ n l +++ r
+  where s  = getSize . size $ b
+        ls = getSize . size . tag $ l
+dropJ _ _ = Empty
