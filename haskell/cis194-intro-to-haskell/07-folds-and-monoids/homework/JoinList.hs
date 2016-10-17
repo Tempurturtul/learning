@@ -1,7 +1,11 @@
 {-# OPTIONS_GHC -Wall #-}
+{-# LANGUAGE FlexibleInstances #-}
 module JoinList where
 
 import Sized
+import Scrabble
+import Buffer
+import Data.Maybe
 
 data JoinList m a = Empty
                   | Single m a
@@ -80,3 +84,48 @@ takeJ n (Append b l r)
   where s  = getSize . size $ b
         ls = getSize . size . tag $ l
 takeJ _ _ = Empty
+
+-- Exercise 3 (Also in Scrabble) ------------------------------------
+
+-- Scores a line using Scrabble scoring.
+scoreLine :: String -> JoinList Score String
+scoreLine "" = Empty
+scoreLine s  = Single (scoreString s) s
+
+{- Example:
+     scoreLine "yay " +++ scoreLine "haskell!"
+       -->
+     Append (Score 23)
+       (Single (Score 9) "yay ")
+       (Single (Score 14) "haskell!") -}
+
+-- Exercise 4 -------------------------------------------------------
+
+{- Data.Monoid definition for a pair of monoids:
+
+  instance (Monoid a, Monoid b) => Monoid (a, b) where
+    mempty                    = (mempty, mempty)
+    mappend (a1, b1) (a2, b2) = (mappend a1 a2, mappend b1 b2) -}
+
+instance Buffer (JoinList (Score, Size) String) where
+  toString Empty = ""
+  toString (Single _ s) = s
+  toString (Append _ l r) = toString l ++ toString r
+
+  fromString s = Single (scoreString s, Size 1) s
+
+  line = indexJ
+
+  -- | @replaceLine n ln buf@ returns a modified version of @buf@,
+  --   with the @n@th line replaced by @ln@.  If the index is
+  --   out-of-bounds, the buffer should be returned unmodified.
+  replaceLine n s jl
+    | isJust $ line n jl = pre +++ fromString s +++ post
+    | otherwise          = jl
+    where pre      = takeJ n jl
+          post     = dropJ (n + 1) jl
+
+  numLines = getSize . snd . tag
+
+  value = getScore . fst . tag
+        where getScore = (\(Score n) -> n)
