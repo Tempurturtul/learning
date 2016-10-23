@@ -1,5 +1,7 @@
 # Flux Todo List Tutorial
 
+***(On hold.)***
+
 [Link to tutorial.](https://facebook.github.io/flux/docs/todo-list.html#content)
 
 **Instructor:**
@@ -16,3 +18,4 @@
 1. [Dispatchers](https://github.com/Tempurturtul/learning/commit/3636f66d3fbe75bd927b12c24df311fdeef6afbf)
 1. [Store](https://github.com/Tempurturtul/learning/commit/8121e70b7396b6eac614322b8b2c8feeda01e5e0)
 1. [Store (Simplified)](https://github.com/Tempurturtul/learning/commit/b093ad29dfd4a54210324920be42cf8105d6fb1b)
+1. ...
