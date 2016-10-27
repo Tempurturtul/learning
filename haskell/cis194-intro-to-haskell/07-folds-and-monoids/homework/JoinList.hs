@@ -6,6 +6,7 @@ import Sized
 import Scrabble
 import Buffer
 import Data.Maybe
+import Editor
 
 data JoinList m a = Empty
                   | Single m a
@@ -116,9 +117,6 @@ instance Buffer (JoinList (Score, Size) String) where
 
   line = indexJ
 
-  -- | @replaceLine n ln buf@ returns a modified version of @buf@,
-  --   with the @n@th line replaced by @ln@.  If the index is
-  --   out-of-bounds, the buffer should be returned unmodified.
   replaceLine n s jl
     | isJust $ line n jl = pre +++ fromString s +++ post
     | otherwise          = jl
@@ -129,3 +127,7 @@ instance Buffer (JoinList (Score, Size) String) where
 
   value = getScore . fst . tag
         where getScore = (\(Score n) -> n)
+
+-- Run editor interface using join-list backend.
+main = runEditor editor $ buf
+  where buf = (fromString "This is a test.") :: JoinList (Score, Size) String
