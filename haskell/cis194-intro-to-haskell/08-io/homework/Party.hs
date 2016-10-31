@@ -2,6 +2,7 @@
 module Party where
 
 import Employee
+import Data.Tree
 
 -- Exercise 1 -------------------------------------------------------
 
@@ -22,3 +23,20 @@ moreFun a b
   | otherwise = b
 
 -- Exercise 2 -------------------------------------------------------
+
+-- Fold for Data.Tree.
+-- treeFold :: (b -> a -> b -> b) -> b -> Tree a -> b
+-- treeFold f z (Node x []) = f z x ?
+
+exTree01 :: Tree String
+exTree01
+  = Node "Hi"
+    [ Node "there"
+      [ Node "Bob." [],
+        Node "George." []
+      ],
+      Node "Mister." [],
+      Node "Ma'am." []
+    ]
+
+-- Exercise 3 -------------------------------------------------------
