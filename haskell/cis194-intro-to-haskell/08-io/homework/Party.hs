@@ -35,47 +35,30 @@ treeFold f (Node x ts) = f x (map (treeFold f) ts)
 -- Given a boss and list of results under the boss, computes the best
 -- list with and without the boss.
 -- nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+-- nextLevel e [] = (GL [e] (empFun e), GL [] 0)
+-- nextLevel e ts =
 
 {-
 
 So...
 
-Given:
-  Node (Emp "A" 1) []       *
-Expect:
-  (
-    GL [Emp "A" 1] 1,
-    GL [] 0
-  )
+Given:                            "If x is invited:
+                                    can't invite *!,
+                                    can invite *,
+                                    can either invite *n or *m."
 
-Given:
-  Node (Emp "A" 1)          *
-  [
-    Node (Emp "a" 1) [],    **
-    Node (Emp "b" 1) []     **
-  ]
-Expect:
-  (
-    GL [Emp "A" 1] 1,
-    GL [Emp "a" 1, Emp "b" 1] 2
-  )
-
-Given:
-  Node (Emp "A" 1)          *
-  [
-    Node (Emp "a" 1) [],    **
-    Node (Emp "b" 1) [],    **
-    Node (Emp "c" 1)        **
-    [
-      Node (Emp "Z" 1) [],  *
-      Node (Emp "Y" 1) []   *
+  Node (Emp "Stan" 9)             *     |       |       |
+  [ Node (Emp "Bob" 2)            *!    |  *    |       |
+    [ Node (Emp "Joe" 5)          *1    |  *!   |  *    |
+      [ Node (Emp "John" 1) []    *2    |  *    |  *!   |
+      , Node (Emp "Sue" 5) []     *2    |  *    |  *!   |
+      ]                                 |       |--------
+    , Node (Emp "Fred" 3) []      *     |  *!   |  *    |
+    ]                                   |----------------
+  , Node (Emp "Sarah" 17)         *!    |  *    |       |
+    [ Node (Emp "Sam" 4) []       *     |  *!   |  *    |
     ]
   ]
-Expect:
-  (
-    GL [Emp "A" 1, Emp "Z" 1, Emp "Y" 1] 3,
-    GL [Emp "a" 1, Emp "b" 1, Emp "c" 1] 3
-  )
 
 -}
 
