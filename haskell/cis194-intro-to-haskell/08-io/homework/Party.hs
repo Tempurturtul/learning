@@ -9,7 +9,9 @@ import Data.Tree
 -- Adds an Employee to the GuestList, and updates the Fun score by
 -- simply adding the Employee's Fun score to the total.
 glCons :: Employee -> GuestList -> GuestList
-glCons (Emp name fun) (GL list total) = GL (list ++ [(Emp name fun)]) (total + fun)
+glCons e (GL l n) = GL k m
+  where k = (e:l)
+        m = n + empFun e
 
 -- Monoid instance for GuestList.
 instance Monoid GuestList where
@@ -25,18 +27,59 @@ moreFun a b
 -- Exercise 2 -------------------------------------------------------
 
 -- Fold for Data.Tree.
--- treeFold :: (b -> a -> b -> b) -> b -> Tree a -> b
--- treeFold f z (Node x []) = f z x ?
-
-exTree01 :: Tree String
-exTree01
-  = Node "Hi"
-    [ Node "there"
-      [ Node "Bob." [],
-        Node "George." []
-      ],
-      Node "Mister." [],
-      Node "Ma'am." []
-    ]
+treeFold :: (a -> [b] -> b) -> Tree a -> b
+treeFold f (Node x ts) = f x (map (treeFold f) ts)
 
 -- Exercise 3 -------------------------------------------------------
+
+-- Given a boss and list of results under the boss, computes the best
+-- list with and without the boss.
+-- nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+
+{-
+
+So...
+
+Given:
+  Node (Emp "A" 1) []       *
+Expect:
+  (
+    GL [Emp "A" 1] 1,
+    GL [] 0
+  )
+
+Given:
+  Node (Emp "A" 1)          *
+  [
+    Node (Emp "a" 1) [],    **
+    Node (Emp "b" 1) []     **
+  ]
+Expect:
+  (
+    GL [Emp "A" 1] 1,
+    GL [Emp "a" 1, Emp "b" 1] 2
+  )
+
+Given:
+  Node (Emp "A" 1)          *
+  [
+    Node (Emp "a" 1) [],    **
+    Node (Emp "b" 1) [],    **
+    Node (Emp "c" 1)        **
+    [
+      Node (Emp "Z" 1) [],  *
+      Node (Emp "Y" 1) []   *
+    ]
+  ]
+Expect:
+  (
+    GL [Emp "A" 1, Emp "Z" 1, Emp "Y" 1] 3,
+    GL [Emp "a" 1, Emp "b" 1, Emp "c" 1] 3
+  )
+
+-}
+
+-- Exercise 4 -------------------------------------------------------
+
+-- Finds the most fun GuestList given an Employee hierarchy.
+-- maxFun :: Tree Employee -> GuestList
