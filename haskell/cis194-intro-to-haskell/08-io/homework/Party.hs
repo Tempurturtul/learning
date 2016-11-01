@@ -20,9 +20,7 @@ instance Monoid GuestList where
 
 -- Returns the more fun GuestList (either if equal).
 moreFun :: GuestList -> GuestList -> GuestList
-moreFun a b
-  | a >= b    = a
-  | otherwise = b
+moreFun = max
 
 -- Exercise 2 -------------------------------------------------------
 
@@ -35,8 +33,9 @@ treeFold f (Node x ts) = f x (map (treeFold f) ts)
 -- Given a boss and list of results under the boss, computes the best
 -- list with and without the boss.
 -- nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
--- nextLevel e [] = (GL [e] (empFun e), GL [] 0)
--- nextLevel e ts =
+-- nextLevel e ls = (with, without)
+--   where with    = foldr moreFun (GL [e] (empFun e)) . map (glCons e) $ map snd ls
+--         without = foldr moreFun (GL [] 0) $ map fst ls
 
 {-
 
@@ -66,3 +65,4 @@ Given:                            "If x is invited:
 
 -- Finds the most fun GuestList given an Employee hierarchy.
 -- maxFun :: Tree Employee -> GuestList
+-- maxFun = uncurry moreFun . treeFold nextLevel
