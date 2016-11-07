@@ -3,6 +3,7 @@ module Party where
 
 import Employee
 import Data.Tree
+import Data.List
 
 -- Exercise 1 -------------------------------------------------------
 
@@ -42,3 +43,14 @@ nextLevel boss ls = (with, without)
 -- Finds the most fun GuestList given an Employee hierarchy.
 maxFun :: Tree Employee -> GuestList
 maxFun = uncurry moreFun . treeFold nextLevel
+
+-- Exercise 5 -------------------------------------------------------
+
+-- Formats a GuestList.
+format :: GuestList -> String
+format (GL xs fun) = foldl (++) total . map ("\n" ++) . sort $ map empName xs
+  where total = "Total fun: " ++ show fun
+
+-- Prints a formatted GuestList using the employee tree in company.txt.
+main :: IO ()
+main = readFile "./company.txt" >>= (putStrLn . format . maxFun . read)
