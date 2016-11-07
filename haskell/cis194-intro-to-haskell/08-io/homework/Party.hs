@@ -38,27 +38,20 @@ treeFold f (Node x ts) = f x (map (treeFold f) ts)
 --         without = foldr moreFun (GL [] 0) $ map fst ls
 
 {-
-
-So...
-
-Given:                            "If x is invited:
-                                    can't invite *!,
-                                    can invite *,
-                                    can either invite *n or *m."
-
-  Node (Emp "Stan" 9)             *     |       |       |
-  [ Node (Emp "Bob" 2)            *!    |  *    |       |
-    [ Node (Emp "Joe" 5)          *1    |  *!   |  *    |
-      [ Node (Emp "John" 1) []    *2    |  *    |  *!   |
-      , Node (Emp "Sue" 5) []     *2    |  *    |  *!   |
-      ]                                 |       |--------
-    , Node (Emp "Fred" 3) []      *     |  *!   |  *    |
-    ]                                   |----------------
-  , Node (Emp "Sarah" 17)         *!    |  *    |       |
-    [ Node (Emp "Sam" 4) []       *     |  *!   |  *    |
+testCompany :: Tree Employee
+testCompany
+  = Node (Emp "Stan" 9)             (9+5+3+4, 2+1+5+17)
+    [ Node (Emp "Bob" 2)              (2+1+5, 5+3)
+      [ Node (Emp "Joe" 5)              (5, 1+5)
+        [ Node (Emp "John" 1) []          (1, 0)
+        , Node (Emp "Sue" 5) []           (5, 0)
+        ]
+      , Node (Emp "Fred" 3) []          (3, 0)
+      ]
+    , Node (Emp "Sarah" 17)           (17, 4)
+      [ Node (Emp "Sam" 4) []           (4, 0)
+      ]
     ]
-  ]
-
 -}
 
 -- Exercise 4 -------------------------------------------------------
