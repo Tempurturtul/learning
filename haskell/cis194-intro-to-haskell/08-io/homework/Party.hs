@@ -32,30 +32,13 @@ treeFold f (Node x ts) = f x (map (treeFold f) ts)
 
 -- Given a boss and list of results under the boss, computes the best
 -- list with and without the boss.
--- nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
--- nextLevel e ls = (with, without)
---   where with    = foldr moreFun (GL [e] (empFun e)) . map (glCons e) $ map snd ls
---         without = foldr moreFun (GL [] 0) $ map fst ls
-
-{-
-testCompany :: Tree Employee
-testCompany
-  = Node (Emp "Stan" 9)             (9+5+3+4, 2+1+5+17)
-    [ Node (Emp "Bob" 2)              (2+1+5, 5+3)
-      [ Node (Emp "Joe" 5)              (5, 1+5)
-        [ Node (Emp "John" 1) []          (1, 0)
-        , Node (Emp "Sue" 5) []           (5, 0)
-        ]
-      , Node (Emp "Fred" 3) []          (3, 0)
-      ]
-    , Node (Emp "Sarah" 17)           (17, 4)
-      [ Node (Emp "Sam" 4) []           (4, 0)
-      ]
-    ]
--}
+nextLevel :: Employee -> [(GuestList, GuestList)] -> (GuestList, GuestList)
+nextLevel boss ls = (with, without)
+  where with    = glCons boss . foldr mappend mempty . map snd $ ls
+        without = foldr mappend mempty . map fst $ ls
 
 -- Exercise 4 -------------------------------------------------------
 
 -- Finds the most fun GuestList given an Employee hierarchy.
--- maxFun :: Tree Employee -> GuestList
--- maxFun = uncurry moreFun . treeFold nextLevel
+maxFun :: Tree Employee -> GuestList
+maxFun = uncurry moreFun . treeFold nextLevel
