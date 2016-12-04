@@ -66,9 +66,7 @@ first f (a,b) = (f a, b)
 
 -- Functor instance for Parser.
 instance Functor Parser where
-  fmap f h = g
-    where
-      g = Parser (fmap (first f) . runParser h)
+  fmap f h = Parser (fmap (first f) . runParser h)
 
 -- Exercise 2 -------------------------------------------------------
 
