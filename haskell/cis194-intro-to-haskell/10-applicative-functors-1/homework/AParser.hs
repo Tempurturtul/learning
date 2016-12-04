@@ -57,3 +57,22 @@ posInt = Parser f
 ------------------------------------------------------------
 -- Your code goes below here
 ------------------------------------------------------------
+
+-- Exercise 1 -------------------------------------------------------
+
+-- Applies a function to the first value of a pair.
+first :: (a -> b) -> (a,c) -> (b,c)
+first f (a,b) = (f a, b)
+
+-- Functor instance for Parser.
+instance Functor Parser where
+  fmap f h = g
+    where
+      g = Parser (fmap (first f) . runParser h)
+
+-- Exercise 2 -------------------------------------------------------
+
+-- Applicative instance for Parser.
+instance Applicative Parser where
+  pure a    = Parser (\_ -> Just (a, []))
+  -- p1 <*> p2 =
