@@ -68,9 +68,31 @@ first f (a,b) = (f a, b)
 instance Functor Parser where
   fmap f h = Parser (fmap (first f) . runParser h)
 
+-- runParser (fmap (+ 1) posInt) "10ab1"
+--   = Just (11, "ab1")
+
 -- Exercise 2 -------------------------------------------------------
 
 -- Applicative instance for Parser.
 instance Applicative Parser where
-  pure a    = Parser (\_ -> Just (a, []))
-  -- p1 <*> p2 =
+  pure a    = Parser (\str -> Just (a, str))
+  p1 <*> p2 = Parser (\str -> case runParser p1 str of
+                                Nothing        -> Nothing
+                                Just (f, rest) -> first f <$> runParser p2 rest)
+                                  -- `runParser p2 rest` produces type Maybe.
+                                  -- `<$>` then calls the Maybe instance of
+                                  -- fmap, not the Parser instance.
+
+-- runParser (pure 5) "abc"
+--   = Just (5, "abc")
+-- runParser ((fmap (+) posInt) <*> (pure 3)) "55"
+--   = Just (58, "")
+
+-- Exercise 3 -------------------------------------------------------
+
+-- Expects the characters 'a' and 'b', and returns them as a pair.
+-- (Note: Implement using the Applicative interface.)
+abParser :: Parser (Char, Char)
+abParser = combine <$> (char 'a') <*> (char 'b')
+  where
+    combine = (\a b -> (a, b))
