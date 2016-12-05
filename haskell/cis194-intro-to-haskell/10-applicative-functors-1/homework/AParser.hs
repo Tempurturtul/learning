@@ -61,12 +61,12 @@ posInt = Parser f
 -- Exercise 1 -------------------------------------------------------
 
 -- Applies a function to the first value of a pair.
-first :: (a -> b) -> (a,c) -> (b,c)
-first f (a,b) = (f a, b)
+first :: (a -> b) -> (a, c) -> (b, c)
+first f (a, b) = (f a, b)
 
 -- Functor instance for Parser.
 instance Functor Parser where
-  fmap f h = Parser (fmap (first f) . runParser h)
+  fmap f p = Parser (fmap (first f) . runParser p)
 
 -- runParser (fmap (+ 1) posInt) "10ab1"
 --   = Just (11, "ab1")
