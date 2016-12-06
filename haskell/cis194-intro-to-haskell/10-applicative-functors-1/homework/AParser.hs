@@ -96,3 +96,18 @@ abParser :: Parser (Char, Char)
 abParser = combine <$> (char 'a') <*> (char 'b')
   where
     combine = (\a b -> (a, b))
+
+-- Like abParser, except returns ().
+abParser_ :: Parser ()
+abParser_ = empty <$> abParser
+  where
+    empty = (\_ -> ())
+
+-- Expects two integers separated by a space, and returns them in a list.
+intPair :: Parser [Integer]
+intPair = buildList <$> posInt <*> space <*> posInt
+  where
+    space    = char ' '
+    buildList = (\a _ b -> [a, b])
+
+-- Exercise 4 -------------------------------------------------------
