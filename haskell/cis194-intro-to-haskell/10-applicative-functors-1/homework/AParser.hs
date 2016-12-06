@@ -126,3 +126,17 @@ instance Alternative Parser where
                               -- Uses Alternative instance for Maybe.
 
 -- Exercise 5 -------------------------------------------------------
+
+-- Parses either an integer or uppercase letter, fails otherwise.
+-- intOrUppercase :: Parser ()
+-- intOrUppercase = empty <$> (posInt <|> upper)
+--   where
+--     empty = (\_ -> ())
+--     upper = satisfy isUpper
+
+-- runParser intOrUppercase "342abcd"
+--   = Just((), "abcd")
+-- runParser intOrUppercase "XYZ"
+--   = Just((), "YZ")
+-- runParser intOrUppercase "foo"
+--   = Nothing
