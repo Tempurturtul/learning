@@ -111,3 +111,18 @@ intPair = buildList <$> posInt <*> space <*> posInt
     buildList = (\a _ b -> [a, b])
 
 -- Exercise 4 -------------------------------------------------------
+
+{- class Applicative f => Alternative f where
+     empty :: f a
+     -- Represents choice.
+     (<|>) :: f a -> f a -> f a -}
+
+instance Alternative Parser where
+  empty     = Parser (\_ -> Nothing)
+  -- p1 <|> p2 = Parser (\str -> case runParser p1 str of
+  --                               Nothing   -> runParser p2 str
+  --                               something -> something)
+  p1 <|> p2 = Parser (\str -> (runParser p1 str) <|> (runParser p2 str))
+                              -- Uses Alternative instance for Maybe.
+
+-- Exercise 5 -------------------------------------------------------
