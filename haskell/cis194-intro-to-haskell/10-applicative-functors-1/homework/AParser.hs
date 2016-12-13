@@ -128,11 +128,14 @@ instance Alternative Parser where
 -- Exercise 5 -------------------------------------------------------
 
 -- Parses either an integer or uppercase letter, fails otherwise.
--- intOrUppercase :: Parser ()
--- intOrUppercase = empty <$> (posInt <|> upper)
---   where
---     empty = (\_ -> ())
---     upper = satisfy isUpper
+intOrUppercase :: Parser ()
+intOrUppercase = empty <$> (posIntStr <|> upperStr)
+  where
+    empty     = (\_ -> ())
+    posIntStr = show <$> posInt
+    upperStr  = show <$> (satisfy isUpper)
+    -- <|> requires same types, using show here to convert to String as
+    -- the same type.
 
 -- runParser intOrUppercase "342abcd"
 --   = Just((), "abcd")
