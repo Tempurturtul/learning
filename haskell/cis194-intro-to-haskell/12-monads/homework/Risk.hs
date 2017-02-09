@@ -82,6 +82,22 @@ invade bf
   | (defenders bf) < 1 = return bf
   | otherwise          = (battle bf) >>= invade
 
+-- Exercise 4 -------------------------------------------------------
+
+-- Estimates probability that invasion will succeed by analyzing 1000
+-- simulated invasions.
+successProb :: Battlefield -> Rand StdGen Double
+successProb bf = simulations >>= (\bfs -> return (getSuccessful bfs)) >>= (\bfs -> return ((fromIntegral $ length bfs) / 1000))
+  where
+    simulations   = sequence (replicate 1000 (invade bf))
+    getSuccessful = filter (\bf -> (defenders bf) == 0)
+
+-- Exercise 5 (Optional) --------------------------------------------
+
+-- Computes exact probability of success without running any simulations.
+exactSuccessProb :: Battlefield -> Double
+exactSuccessProb = undefined
+
 -- Tests ------------------------------------------------------------
 
 getBattlers01 = (getBattlers (Battlefield 1 0)) == (0, 0)
@@ -119,3 +135,18 @@ invadeTest :: IO()
 invadeTest = do
   bf <- evalRandIO (invade (Battlefield 8 8))
   print bf
+
+successProbTest :: IO()
+successProbTest = do
+  prob <- evalRandIO (successProb (Battlefield 8 8))
+  print prob
+
+successProbTestUnlikely :: IO()
+successProbTestUnlikely = do
+  prob <- evalRandIO (successProb (Battlefield 8 12))
+  print prob
+
+successProbTestLikely :: IO()
+successProbTestLikely = do
+  prob <- evalRandIO (successProb (Battlefield 12 8))
+  print prob
