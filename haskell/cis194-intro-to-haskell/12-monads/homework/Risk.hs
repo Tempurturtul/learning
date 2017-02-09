@@ -72,6 +72,16 @@ battle bf = rolls >>= (\rs -> return (resolve battlers rs)) >>= (\armies -> retu
     battlers = getBattlers bf
     rolls = dice (uncurry (+) battlers)
 
+-- Exercise 3 -------------------------------------------------------
+
+-- Simulates an entire invasion attempt. Resolves when no defenders or
+-- less than two attackers remain.
+invade :: Battlefield -> Rand StdGen Battlefield
+invade bf
+  | (attackers bf) < 2 = return bf
+  | (defenders bf) < 1 = return bf
+  | otherwise          = (battle bf) >>= invade
+
 -- Tests ------------------------------------------------------------
 
 getBattlers01 = (getBattlers (Battlefield 1 0)) == (0, 0)
@@ -100,7 +110,12 @@ updateTests = [update01, update02, update03]
 instance Show Battlefield where
   show bf = "Attackers: " ++ show (attackers bf) ++ ", Defenders: " ++ show (defenders bf)
 
-main :: IO()
-main = do
-  b <- evalRandIO (battle (Battlefield 8 8))
-  print b
+battleTest :: IO()
+battleTest = do
+  bf <- evalRandIO (battle (Battlefield 8 8))
+  print bf
+
+invadeTest :: IO()
+invadeTest = do
+  bf <- evalRandIO (invade (Battlefield 8 8))
+  print bf
