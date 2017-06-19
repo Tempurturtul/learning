@@ -1,0 +1,16 @@
+{
+  "main": "server.js",
+  "scripts": {
+      "start": "nodemon server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "express": "^4.15.3",
+    "jsonwebtoken": "^7.4.1",
+    "passport": "^0.3.2",
+    "pg-promise": "^5.9.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
